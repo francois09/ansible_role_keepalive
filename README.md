@@ -48,7 +48,7 @@ Example Playbooks
 -----------------
 
 VIP stickiness
-==============
+~~~~~~~~~~~~~~
 
 There is 2 servers in BACKUP mode and the `nopreempt` option. On start, server with
 higher priority becomes MASTER and manages the VIP. If the MASTER fail, the other
@@ -80,7 +80,7 @@ keepalive__instance_priority: 102
 ```
 
 SMTP alert
-==========
+~~~~~~~~~~
 To send an e-mail when a transition state occur:
 
 ```yaml
@@ -91,7 +91,7 @@ keepalive__global_defs:
 ```
 
 Notification scripts
-====================
+~~~~~~~~~~~~~~~~~~~~
 
 Execute a script for 'all' state transition, where valid keys are 'all', 'master', 'backup', 'fault'
 
