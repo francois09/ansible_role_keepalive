@@ -1,0 +1,19 @@
+---
+keepalive__install: False
+keepalive__configure: False
+keepalive__default_packages:
+  - keepalived
+  - ipset
+keepalive__global_defs: {}
+#keepalive__check_service: haproxy
+keepalive__instance: default_vrrp_instance
+keepalive__instance_state: MASTER
+keepalive__services: []
+keepalive__vip: False
+keepalive__instance_priority: 200
+keepalive__virtual_router_id: 100
+keepalive__advert_interval: 1
+keepalive__interface: eth0
+keepalive__authentication_password: default_password
+keepalive__nopreempt: false
+keepalive__smtp_alert: false

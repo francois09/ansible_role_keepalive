@@ -1,0 +1,53 @@
+---
+- name: Install required packages
+  apt:
+    name: "{{ keepalive__default_packages }}"
+    state: present
+    update_cache: yes
+  when:
+    - keepalive__install
+
+- name: Update sysctl nonlocal bind
+  sysctl:
+    name: "net.ipv4.ip_nonlocal_bind"
+    value: "1"
+    sysctl_set: yes
+    state: present
+    reload: yes
+  when:
+    - keepalive__install
+    - keepalive__configure
+
+- name: Setup keepalived conf file
+  template:
+    src: keepalived.conf
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: 0600
+  register: keepalived_conf
+  when:
+    - keepalive__install
+    - keepalive__configure
+
+- name: install notify scripts
+  copy:
+    dest: /usr/local/sbin/keepalive_notify_{{ item.key }}_{{ keepalive__instance }}
+    content: "{{ item.value.shell }}"
+    owner: "{{ item.value.username }}"
+    group: "{{ item.value.groupname }}"
+    mode: 0700
+  with_dict: "{{ keepalive__notify_scripts }} "
+  when:
+    - keepalive__install
+    - keepalive__notify_scripts is defined and keepalive__notify_scripts is mapping
+    - item.value.shell is defined
+
+- name: 'Check keepalived state: reload or start if needed and enable start on boot'
+  service:
+    name: keepalived
+    state: "{{ (keepalived_conf is changed)|ternary('reloaded', 'started') }}"
+    enabled: yes
+  when:
+    - keepalive__install
+    - keepalive__configure
