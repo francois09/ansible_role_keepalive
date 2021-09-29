@@ -7,13 +7,8 @@
   when:
     - keepalive__install
 
-- name: Update sysctl nonlocal bind
-  sysctl:
-    name: "net.ipv4.ip_nonlocal_bind"
-    value: "1"
-    sysctl_set: yes
-    state: present
-    reload: yes
+- name: Set the kernel option package IP nonlocal bind
+  sysctl: name=net.ipv4.ip_nonlocal_bind value=1 reload=yes
   when:
     - keepalive__install
     - keepalive__configure
