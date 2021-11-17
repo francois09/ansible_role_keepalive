@@ -27,16 +27,15 @@
 
 - name: install notify scripts
   copy:
-    dest: /usr/local/sbin/keepalive_notify_{{ item.key }}_{{ keepalive__instance }}
-    content: "{{ item.value.shell }}"
-    owner: "{{ item.value.username }}"
-    group: "{{ item.value.groupname }}"
+    dest: /usr/local/sbin/{{ item.name }}
+    content: "{{ item.shell }}"
+    owner: "{{ item.username }}"
+    group: "{{ item.groupname }}"
     mode: 0700
-  with_dict: "{{ keepalive__notify_scripts }} "
+  with_items: "{{ keepalive__notify_scripts }} "
   when:
     - keepalive__install
-    - keepalive__notify_scripts is defined and keepalive__notify_scripts is mapping
-    - item.value.shell is defined
+    - keepalive__notify_scripts is defined and keepalive__notify_scripts is iterable
 
 - name: 'Check keepalived state: reload or start if needed and enable start on boot'
   service:

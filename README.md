@@ -10,33 +10,41 @@ Role Variables
 --------------
 
 ```
-keepalive__install: True                         # Should install or not
-keepalive__configure: True 			 # Should configure or not
-keepalive__vip: 192.168.0.254			 # The vip switched between instances
-keepalive__interface: eth0			 # The network interface who support the VIP
-keepalive__instance: default_instance		 # Name of the instance
-keepalive__instance_state: MASTER		 # Initial state of instance
-keepalive__instance_priority: 100		 # Instance priority
-keepalive__virtual_router_id: 180		 # Router ID
-keepalive__services:	      			 #
-  - name: haproxy				 # Service name used to control MASTER/BACKUP state
-    # interval: 2				 # How ofter check service (sec)
-    # fall: 2					 # How much fail before setting to FAULT
-    # rise: 2					 # How much success before setting to UP
-    # weight: 2					 # FAULT transition delay
-keepalive__authentication_password: 123456	 # VRRP password
-keepalive__global_defs:		    		 #
-  smtp_server: localhost 25			 #
-  notification_email: [email1, email2 ]		 # 
-keepalive__nopreempt: true     	      		 # If master should reclaim VIP when up again or not
-keepalive__smtp_alert: true			 #
-keepalive__notify_scripts:			 # Script launched when in STATE state (or all)
-  STATE:
+keepalive__install: True                        # Should install or not
+keepalive__configure: True 			# Should configure or not
+
+keepalive__global_defs:		    		# Global definitions for Keepalive
+  smtp_server: localhost 25
+  notification_email: [email1, email2 ]
+
+keepalive__notify_scripts:			# Notification scripts used in instances
+  - name: logEvent
     username: root
     groupname: root
     shell: |
-      #!/bin/bash
-      echo "$(date) keepalived $@ " >> /var/log/keepalived.log
+      #! /bin/bash
+      echo "$(date) $@" >> /var/log/keepalived.log
+
+keepalive__conf:				# Instances declarations
+  - name: gateway				# Instance name
+    vip: "{{ internal_gateway }}"
+    interface: "{{ internal_gw_port }}"
+    state: MASTER
+    priority: 100
+    router_id: 180
+    password: "{{ keepalived__gateway_password }}"
+    check:
+      name: "ovs-vswitchd"
+      script: "/usr/bin/killall -0 ovs-vswitchd"
+      interval: 2
+      fall: 2
+      rise: 2
+    notify:
+      name: logEvent
+      username: root
+      groupname: root
+    nopreempt: true
+    smtp_alert: true
 ```
 
 Dependencies
